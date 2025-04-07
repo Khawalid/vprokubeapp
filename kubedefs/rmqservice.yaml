@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vpromq01
+  labels:
+    app: vprormq
+spec:
+  type: ClusterIP
+  selector:
+    app: vprormq
+  ports:
+    - name: rabbitmq
+      protocol: TCP
+      port: 5672
+      targetPort: 5672

@@ -1,0 +1,14 @@
+Init containers run when a Deployment is created for the first time. They execute before the main container starts and exit after successful completion. Only then does the main container begin running. Init containers also run each time new pods are created or existing pods are restarted. This includes scenarios such as pod creation, deletion, scaling, or rolling updates. If multiple pods are affected, the init container runs separately for each pod, once per pod lifecycle.
+
+We have placed init container in vprodb pod because we want to delete lost+found dir in the volume because at the start when pod is getting initialized with container /var/lib/mysql expects the volume (AWS EBS volumes) to be empty otherwise it will fail and when the volume is created lost+found directory is created because of the file system installed in volume enabling it to store files
+
+In tomcat pods we are using init container to first initialize backend services then tomcat frontend will be up.
+
+Flow of project is
+
+User -> Load Balancer -> Ingress Controller Checks domain and path-> Tomcat service -> Tomcat pod
+If tomcat wants to talk to backend services or even backend services want to talk with each other they will access each other through the Kubernetes clusterIP services. Services will be accessed and those services will send to respective pods attached to those services.
+For eg if tomcat wants to talk with db it will send request to db service which will forward the request to db pod. We have named the backend services names by matching the names of backend endpoints in application.properties file of app.
+(So backend services are able to serve the request they get)
+PersistentVolumeClaim(PVC) talks with default storage class created by kops and the storage class talks with ebs volume so it gets attached to the db pod.
+DB password and RabbitMQ passwords are stored in secret and are injected in these pods from the secret. 
